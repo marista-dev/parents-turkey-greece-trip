@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>부모님의 터키-그리스 여행</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', '맑은 고딕', sans-serif;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0;
+        }
+        
+        /* 모바일 헤더 */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header h1 {
+            font-size: 20px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* 모바일 지도 섹션 */
+        .map-section {
+            background: white;
+            margin: 10px;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .map-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+            position: relative;
+        }
+        
+        /* 모바일 요약 카드 */
+        .route-summary {
+            margin: 10px;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .summary-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .summary-card:active {
+            transform: scale(0.98);
+        }
+        .summary-card h3 {
+            color: #667eea;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        .summary-card .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        /* 모바일 상세 경로 */
+        .detailed-route {
+            margin: 10px;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .route-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .route-header h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .route-header p {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* 모바일 경로 카드 */
+        .route-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .route-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .route-card:active {
+            background: #e9ecef;
+            transform: translateX(2px);
+        }
+        .route-card.greece {
+            border-left-color: #48bb78;
+        }
+        
+        .city-number {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .greece .city-number {
+            background: #48bb78;
+        }
+        
+        .city-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .city-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .city-name-local {
+            color: #666;
+            font-size: 13px;
+        }
+        .city-description {
+            color: #666;
+            font-size: 13px;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .distance-info {
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .distance-label {
+            color: #999;
+            font-size: 11px;
+        }
+        .distance-value {
+            color: #e53e3e;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        /* 모바일 구분선 */
+        .country-divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+        .country-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+        .country-divider span {
+            background: white;
+            padding: 5px 20px;
+            position: relative;
+            z-index: 2;
+            font-weight: bold;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* 모바일 총 거리 표시 */
+        .total-distance {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .total-distance h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .total-distance .value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        /* 모바일 맵 로딩 */
+        .map-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #666;
+        }
+        
+        /* 반응형 조정 */
+        @media (max-width: 375px) {
+            .header h1 {
+                font-size: 18px;
+            }
+            .summary-card .number {
+                font-size: 20px;
+            }
+            .city-name {
+                font-size: 15px;
+            }
+        }
+        
+        /* 섹션 타이틀 */
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        /* 빠른 링크 버튼 */
+        .quick-links {
+            margin: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .quick-link {
+            flex: 1;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .quick-link:active {
+            transform: scale(0.98);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .return-icon {
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 모바일 헤더 -->
+        <div class="header">
+            <h1>🗺️ 터키-그리스 여행</h1>
+            <p>이스탄불 → 카파도키아 → 아테네</p>
+        </div>
+        
+        <!-- 모바일 지도 섹션 -->
+        <div class="map-section">
+            <h2 class="section-title">📍 여행 경로 지도</h2>
+            <div class="map-container" id="map">
+                <div class="map-loading">
+                    <p>지도를 불러오는 중...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 경로 요약 -->
+        <div class="route-summary">
+            <h2 class="section-title">📊 여행 요약</h2>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <h3>총 거리</h3>
+                    <div class="number">3,965km</div>
+                </div>
+                <div class="summary-card">
+                    <h3>방문 도시</h3>
+                    <div class="number">11개</div>
+                </div>
+                <div class="summary-card">
+                    <h3>터키 구간</h3>
+                    <div class="number">1,830km</div>
+                </div>
+                <div class="summary-card">
+                    <h3>그리스 구간</h3>
+                    <div class="number">695km</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 상세 경로 -->
+        <div class="detailed-route" id="route-details">
+            <div class="route-header">
+                <h2>🚗 상세 여행 경로</h2>
+                <p>도시를 터치하면 지도에서 위치를 확인할 수 있습니다</p>
+            </div>
+            
+            <!-- 터키 구간 -->
+            <div class="country-divider">
+                <span>🇹🇷 터키</span>
+            </div>
+            
+            <div class="route-cards">
+                <div class="route-card" onclick="focusCity(1)">
+                    <div class="city-number">1</div>
+                    <div class="city-info">
+                        <div class="city-name">이스탄불</div>
+                        <div class="city-description">보스포루스 해협</div>
+                    </div>
+                    <div class="distance-info">
+                        <div class="distance-label">다음</div>
+                        <div class="distance-value">565km</div>
+                    </div>
+                </div>
+                
+                <div class="route-card" onclick="focusCity(2)">
+                    <div class="city-number">2</div>
+                    <div class="city-info">
+                        <div class="city-name">네부세히르</div>
+                        <div class="city-description">카파도키아 열기구</div>
+                    </div>
+                    <div class="distance-info">
+                        <div class="distance-label">다음</div>
+                        <div class="distance-value">235km</div>
+                    </div>
+                </div>
+                
+                <div class="route-card" onclick="focusCity(3)">
+                    <div class="city-number">3</div>
+                    <div class="city-info">
+                        <div class="city-name">코니아</div>
+                        <div class="city-description">메블라나 박물관</div>
+                    </div>
+                    <div class="distance-info">
+                        <div class="distance-label">다음</div>
+                        <div class="distance-value">305km</div>
+                    </div>
+                </div>
+                
+                <div class="route-card" onclick="focusCity(4)">
+                    <div class="city-number">4</div>
+                    <div class="city-info">
+                        <div class="city-name">안탈리아</div>
+                        <div class="city-description">지중해 휴양도시</div>
+                    </div>
+                    <div class="distance-info">
+                        <div class="distance-label">다음</div>
+                        <div class="distance-value">220km</div>
+                    </div>
+                </div>
+                
+                <div class="route-card" onclick="focusCity(5)">
+                    <div class="city-number">5</div>
+                    <div class="city-info">
+                        <div class="city-name">파묵칼레</div>
+                        <div class="city-description">석회암 온천</div>
+                    </div>
+                    <div class="distance-info">
+                        <div class="distance-label">다음</div>
+                        <div class="distance-value">185km</div>
+                    </div>
+                </div>
+                
+                <div class="route-card" onclick="focusCity(6)">
+                    <div class="city-number">6</div>
+                    <div class="city-info">
+                        <div class="city-name">마니사</div>
+                        <div class="city-description">역사적인 모스크</div>
+                    </div>
+                    <div class="distance-info">
+                        <div class="distance-label">다음</div>
+                        <div class="distance-value">110km</div>
+                    </div>
+                </div>
+                
+                <div class="route-card" onclick="focusCity(7)">
+                    <div class="city-number">7</div>
+                    <div class="city-info">
+                        <div class="city-name">아이발릭</div>
+                        <div class="city-description">에게해 휴양도시</div>
+                    </div>
+                    <div class="distance-info">
+                        <div class="distance-label">다음</div>
+                        <div class="distance-value">450km</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 그리스 구간 -->
+            <div class="country-divider">
+                <span>🇬🇷 그리스</span>
+            </div>
+            
+            <div class="route-cards">
+                <div class="route-card greece" onclick="focusCity(8)">
+                    <div class="city-number">8</div>
+                    <div class="city-info">
+                        <div class="city-name">까발라</div>
+                        <div class="city-description">북부 항구도시</div>
+                    </div>
+                    <div class="distance-info">
+                        <div class="distance-label">다음</div>
+                        <div class="distance-value">380km</div>
+                    </div>
+                </div>
+                
+                <div class="route-card greece" onclick="focusCity(9)">
+                    <div class="city-number">9</div>
+                    <div class="city-info">
+                        <div class="city-name">메테오라</div>
+                        <div class="city-description">공중 수도원</div>
+                    </div>
+                    <div class="distance-info">
+                        <div class="distance-label">다음</div>
+                        <div class="distance-value">230km</div>
+                    </div>
+                </div>
+                
+                <div class="route-card greece" onclick="focusCity(10)">
+                    <div class="city-number">10</div>
+                    <div class="city-info">
+                        <div class="city-name">코린트</div>
+                        <div class="city-description">고대 도시국가</div>
+                    </div>
+                    <div class="distance-info">
+                        <div class="distance-label">다음</div>
+                        <div class="distance-value">85km</div>
+                    </div>
+                </div>
+                
+                <div class="route-card greece" onclick="focusCity(11)">
+                    <div class="city-number">11</div>
+                    <div class="city-info">
+                        <div class="city-name">아테네</div>
+                        <div class="city-description">파르테논 신전</div>
+                    </div>
+                    <div class="distance-info">
+                        <div class="distance-label">다음</div>
+                        <div class="distance-value">1,100km</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 터키 복귀 -->
+            <div class="country-divider">
+                <span>🇹🇷 터키 복귀</span>
+            </div>
+            
+            <div class="route-cards">
+                <div class="route-card">
+                    <div class="city-number return-icon">↩️</div>
+                    <div class="city-info">
+                        <div class="city-name">이스탄불</div>
+                        <div class="city-description">여행 완료! 🎉</div>
+                    </div>
+                    <div class="distance-info">
+                        <div class="distance-label">복귀</div>
+                        <div class="distance-value">완료</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 총 거리 -->
+            <div class="total-distance">
+                <h3>🏁 총 여행 거리</h3>
+                <div class="value">3,965 km</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Maps JavaScript -->
+    <script>
+        let map;
+        let markers = [];
+        let infoWindow;
+        
+        const cities = [
+            { name: "이스탄불", position: { lat: 41.0082, lng: 28.9784 }, number: 1 },
+            { name: "네부세히르", position: { lat: 38.6939, lng: 34.6857 }, number: 2 },
+            { name: "코니아", position: { lat: 37.8746, lng: 32.4932 }, number: 3 },
+            { name: "안탈리아", position: { lat: 36.8969, lng: 30.7133 }, number: 4 },
+            { name: "파묵칼레", position: { lat: 37.9204, lng: 29.1212 }, number: 5 },
+            { name: "마니사", position: { lat: 38.6191, lng: 27.4289 }, number: 6 },
+            { name: "아이발릭", position: { lat: 39.3199, lng: 26.6856 }, number: 7 },
+            { name: "까발라", position: { lat: 40.9397, lng: 24.4019 }, number: 8 },
+            { name: "메테오라", position: { lat: 39.7217, lng: 21.6306 }, number: 9 },
+            { name: "코린트", position: { lat: 37.9386, lng: 22.9322 }, number: 10 },
+            { name: "아테네", position: { lat: 37.9838, lng: 23.7275 }, number: 11 }
+        ];
+
+        function initMap() {
+            // config.js에서 설정 가져오기
+            const mapConfig = (typeof config !== 'undefined' && config.mapSettings) 
+                ? config.mapSettings 
+                : { defaultZoom: 6, defaultCenter: { lat: 39.0, lng: 27.0 }, mapTypeId: 'roadmap' };
+            
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: mapConfig.defaultZoom,
+                center: mapConfig.defaultCenter,
+                mapTypeId: mapConfig.mapTypeId,
+                disableDefaultUI: true,
+                zoomControl: true,
+                gestureHandling: 'greedy'
+            });
+
+            infoWindow = new google.maps.InfoWindow();
+
+            // 마커 추가
+            cities.forEach((city, index) => {
+                const marker = new google.maps.Marker({
+                    position: city.position,
+                    map: map,
+                    title: city.name,
+                    label: {
+                        text: city.number.toString(),
+                        color: 'white',
+                        fontSize: '14px',
+                        fontWeight: 'bold'
+                    },
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 18,
+                        fillColor: index >= 7 ? '#48bb78' : '#667eea',
+                        fillOpacity: 1,
+                        strokeColor: 'white',
+                        strokeWeight: 3
+                    }
+                });
+
+                marker.addListener('click', () => {
+                    infoWindow.setContent(`<div style="padding: 10px;"><strong>${city.number}. ${city.name}</strong></div>`);
+                    infoWindow.open(map, marker);
+                });
+
+                markers.push(marker);
+            });
+
+            // 경로 라인
+            const routePath = cities.map(city => city.position);
+            routePath.push(cities[0].position);
+
+            const routeLine = new google.maps.Polyline({
+                path: routePath,
+                geodesic: true,
+                strokeColor: '#e74c3c',
+                strokeOpacity: 0.5,
+                strokeWeight: 2,
+                icons: [{
+                    icon: {
+                        path: 'M 0,-1 0,1',
+                        strokeOpacity: 1,
+                        scale: 3
+                    },
+                    offset: '0',
+                    repeat: '10px'
+                }]
+            });
+
+            routeLine.setMap(map);
+
+            // 지도 범위 조정
+            const bounds = new google.maps.LatLngBounds();
+            cities.forEach(city => {
+                bounds.extend(city.position);
+            });
+            map.fitBounds(bounds);
+        }
+
+        // 도시 포커스 함수
+        function focusCity(cityNumber) {
+            const city = cities.find(c => c.number === cityNumber);
+            if (city && map) {
+                map.setCenter(city.position);
+                map.setZoom(10);
+                
+                // 정보창 열기
+                const marker = markers[cityNumber - 1];
+                infoWindow.setContent(`<div style="padding: 10px;"><strong>${city.number}. ${city.name}</strong></div>`);
+                infoWindow.open(map, marker);
+                
+                // 지도 섹션으로 스크롤
+                document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // 에러 처리
+        window.gm_authFailure = function() {
+            document.getElementById("map").innerHTML = 
+                '<div style="padding: 40px; text-align: center; color: #666;">' +
+                '<p>지도를 불러올 수 없습니다</p>' +
+                '<a href="https://maps.app.goo.gl/..." style="color: #4285f4;">지도 앱에서 보기</a>' +
+                '</div>';
+        };
+    </script>
+    <!-- Google Maps API 설정 -->
+    <script src="config.js"></script>
+    <script async defer id="google-maps-script"></script>
+    <script>
+        // config.js에서 API 키를 동적으로 로드
+        document.addEventListener('DOMContentLoaded', function() {
+            const script = document.getElementById('google-maps-script');
+            if (typeof config !== 'undefined' && config.googleMapsApiKey) {
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${config.googleMapsApiKey}&callback=initMap&language=ko`;
+            } else {
+                console.error('Google Maps API 키가 설정되지 않았습니다. config.js 파일을 확인하세요.');
+                document.getElementById("map").innerHTML = 
+                    '<div style="padding: 40px; text-align: center; color: #666;">' +
+                    '<p>지도 설정이 필요합니다</p>' +
+                    '<p style="font-size: 12px; margin-top: 10px;">config.example.js를 config.js로 복사하고 API 키를 입력하세요</p>' +
+                    '</div>';
+            }
+        });
+    </script>
+</body>
+</html>
