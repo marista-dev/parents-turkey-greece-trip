@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <title>부모님의 터키-그리스 여행</title>
+    <title>터키-그리스 여행</title>
     <style>
         * {
             margin: 0;
@@ -318,6 +318,7 @@
             <p>이스탄불 → 카파도키아 → 아테네</p>
         </div>
         
+        
         <!-- 모바일 지도 섹션 -->
         <div class="map-section">
             <h2 class="section-title">📍 여행 경로 지도</h2>
@@ -552,15 +553,10 @@
         ];
 
         function initMap() {
-            // config.js에서 설정 가져오기
-            const mapConfig = (typeof config !== 'undefined' && config.mapSettings) 
-                ? config.mapSettings 
-                : { defaultZoom: 6, defaultCenter: { lat: 39.0, lng: 27.0 }, mapTypeId: 'roadmap' };
-            
             map = new google.maps.Map(document.getElementById("map"), {
-                zoom: mapConfig.defaultZoom,
-                center: mapConfig.defaultCenter,
-                mapTypeId: mapConfig.mapTypeId,
+                zoom: 6,
+                center: { lat: 39.0, lng: 27.0 },
+                mapTypeId: 'roadmap',
                 disableDefaultUI: true,
                 zoomControl: true,
                 gestureHandling: 'greedy'
@@ -655,24 +651,8 @@
                 '</div>';
         };
     </script>
-    <!-- Google Maps API 설정 -->
-    <script src="config.js"></script>
-    <script async defer id="google-maps-script"></script>
-    <script>
-        // config.js에서 API 키를 동적으로 로드
-        document.addEventListener('DOMContentLoaded', function() {
-            const script = document.getElementById('google-maps-script');
-            if (typeof config !== 'undefined' && config.googleMapsApiKey) {
-                script.src = `https://maps.googleapis.com/maps/api/js?key=${config.googleMapsApiKey}&callback=initMap&language=ko`;
-            } else {
-                console.error('Google Maps API 키가 설정되지 않았습니다. config.js 파일을 확인하세요.');
-                document.getElementById("map").innerHTML = 
-                    '<div style="padding: 40px; text-align: center; color: #666;">' +
-                    '<p>지도 설정이 필요합니다</p>' +
-                    '<p style="font-size: 12px; margin-top: 10px;">config.example.js를 config.js로 복사하고 API 키를 입력하세요</p>' +
-                    '</div>';
-            }
-        });
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCCS5HewsOu8GywjKnxBo3XP1vUa0LRLU4&callback=initMap&language=ko">
     </script>
 </body>
 </html>
